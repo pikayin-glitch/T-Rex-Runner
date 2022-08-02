@@ -1,16 +1,19 @@
-// Copyright (c) 2014 The Chromium Authors. All rights reserved.
-// extract from chromium source code
+/**
+ * @author pikayin
+ * 参考来源：谷歌相关源码
+ * 仅学习用途
+ */
 (function () {
     'use strict';
     /**
      * T-Rex runner.
-     * @param {string} outerContainerId Outer containing element id.
+     * @param {string} outerContainerId 外部包含元素id。
      * @param {Object} opt_config
      * @constructor
      * @export
      */
     function Runner(outerContainerId, opt_config) {
-        // Singleton
+        //单例
         if (Runner.instance_) {
             return Runner.instance_;
         }
@@ -42,8 +45,7 @@
 
         this.obstacles = [];
 
-        this.activated = false; // Whether the easter egg has been activated.
-        this.playing = false; // Whether the game is currently in play state.
+        this.playing = false; //游戏当前是否处于运行状态。
         this.crashed = false;
         this.paused = false;
         this.inverted = false;
@@ -52,81 +54,81 @@
 
         this.playCount = 0;
 
-        // Sound FX.
+        // 音效
         this.audioBuffer = null;
         this.soundFx = {};
 
-        // Global web audio context for playing sounds.
+        // 音频上下文
         this.audioContext = null;
 
-        // Images.
+        // 图片
         this.images = {};
         this.imagesLoaded = 0;
 
-        if (this.isDisabled()) {
-            this.setupDisabledRunner();
-        } else {
-            this.loadImages();
-        }
+        this.loadImages();
     }
     window['Runner'] = Runner;
 
 
     /**
-     * Default game width.
+     * 游戏默认宽度
      * @const
      */
     var DEFAULT_WIDTH = 600;
 
     /**
-     * Frames per second.
+     * 预定的每秒帧数
      * @const
      */
     var FPS = 60;
 
+    // 像素大小的比率，标准显示器HiDPI
     /** @const */
     var IS_HIDPI = window.devicePixelRatio > 1;
 
+    // IOS系统
     /** @const */
     var IS_IOS = /iPad|iPhone|iPod/.test(window.navigator.platform);
 
+    // 移动...安卓/IOS
     /** @const */
     var IS_MOBILE = /Android/.test(window.navigator.userAgent) || IS_IOS;
 
+    // 判断是否支持touch事件
     /** @const */
     var IS_TOUCH_ENABLED = 'ontouchstart' in window;
 
     /**
-     * Default game configuration.
+     * 默认游戏配置
      * @enum {number}
      */
     Runner.config = {
-        ACCELERATION: 0.001,
-        BG_CLOUD_SPEED: 0.2,
-        BOTTOM_PAD: 10,
-        CLEAR_TIME: 3000,
-        CLOUD_FREQUENCY: 0.5,
-        GAMEOVER_CLEAR_TIME: 750,
-        GAP_COEFFICIENT: 0.6,
-        GRAVITY: 0.6,
-        INITIAL_JUMP_VELOCITY: 12,
-        INVERT_FADE_DURATION: 12000,
-        INVERT_DISTANCE: 700,
-        MAX_BLINK_COUNT: 3,
-        MAX_CLOUDS: 6,
-        MAX_OBSTACLE_LENGTH: 3,
-        MAX_OBSTACLE_DUPLICATION: 2,
-        MAX_SPEED: 13,
-        MIN_JUMP_HEIGHT: 35,
-        MOBILE_SPEED_COEFFICIENT: 1.2,
+        ACCELERATION: 0.001,    //加速度
+        BG_CLOUD_SPEED: 0.2,    //背景云速度
+        BOTTOM_PAD: 10,         //底部
+        CLEAR_TIME: 3000,       //清空时间
+        CLOUD_FREQUENCY: 0.5,   //云频率
+        GAMEOVER_CLEAR_TIME: 750,//游戏结束清空时间
+        GAP_COEFFICIENT: 0.6,   //隙缝系数
+        GRAVITY: 0.6,           //仿重力系数
+        INITIAL_JUMP_VELOCITY: 12,//初始跳跃速度
+        INVERT_FADE_DURATION: 12000,//反转淡入持续时间
+        INVERT_DISTANCE: 700,   //反转距离
+        MAX_BLINK_COUNT: 3,     //最大BLINK数
+        MAX_CLOUDS: 6,          //最大云数
+        MAX_OBSTACLE_LENGTH: 3, //最大障碍物长度
+        MAX_OBSTACLE_DUPLICATION: 2,//最大障碍物重复
+        MAX_SPEED: 13,          //最高速度
+        MIN_JUMP_HEIGHT: 35,    //最高跳跃高度
+        MOBILE_SPEED_COEFFICIENT: 1.2,//移动端速度系数
         RESOURCE_TEMPLATE_ID: 'audio-resources',
-        SPEED: 6,
-        SPEED_DROP_COEFFICIENT: 3
+        SPEED: 6,               //速度
+        SPEED_DROP_COEFFICIENT: 3   //速度下降系数
     };
 
 
     /**
-     * Default dimensions.
+     * 默认尺寸
      * @enum {string}
      */
     Runner.defaultDimensions = {
@@ -136,7 +138,7 @@
 
 
     /**
-     * CSS class names.
+     * CSS类名
      * @enum {string}
      */
     Runner.classes = {
@@ -152,10 +154,11 @@
 
 
     /**
-     * Sprite definition layout of the spritesheet.
+     * Sprite表单的sprite尺寸
      * @enum {Object}
      */
     Runner.spriteDefinition = {
+        // 分辨率LDPI
         LDPI: {
             CACTUS_LARGE: { x: 332, y: 2 },
             CACTUS_SMALL: { x: 228, y: 2 },
@@ -168,6 +171,7 @@
             TREX: { x: 848, y: 2 },
             STAR: { x: 645, y: 2 }
         },
+        // 分辨率HDPI
         HDPI: {
             CACTUS_LARGE: { x: 652, y: 2 },
             CACTUS_SMALL: { x: 446, y: 2 },
@@ -184,7 +188,7 @@
 
 
     /**
-     * Sound FX. Reference to the ID of the audio tag on interstitial page.
+     * 声音效果。参考中间页上音频标签的ID。
      * @enum {string}
      */
     Runner.sounds = {
@@ -195,7 +199,7 @@
 
 
     /**
-     * Key code mapping.
+     * 键盘映射
      * @enum {Object}
      */
     Runner.keycodes = {
@@ -206,7 +210,7 @@
 
 
     /**
-     * Runner event names.
+     * Runner 事件别名
      * @enum {string}
      */
     Runner.events = {
@@ -227,63 +231,8 @@
 
 
     Runner.prototype = {
-        /**
-         * Whether the easter egg has been disabled. CrOS enterprise enrolled devices.
-         * @return {boolean}
-         */
-        isDisabled: function () {
-            // return loadTimeData && loadTimeData.valueExists('disabledEasterEgg');
-            return false;
-        },
-
-        /**
-         * For disabled instances, set up a snackbar with the disabled message.
-         */
-        setupDisabledRunner: function () {
-            this.containerEl = document.createElement('div');
-            this.containerEl.className = Runner.classes.SNACKBAR;
-            this.containerEl.textContent = loadTimeData.getValue('disabledEasterEgg');
-            this.outerContainerEl.appendChild(this.containerEl);
-
-            // Show notification when the activation key is pressed.
-            document.addEventListener(Runner.events.KEYDOWN, function (e) {
-                if (Runner.keycodes.JUMP[e.keyCode]) {
-                    this.containerEl.classList.add(Runner.classes.SNACKBAR_SHOW);
-                    document.querySelector('.icon').classList.add('icon-disabled');
-                }
-            }.bind(this));
-        },
-
-        /**
-         * Setting individual settings for debugging.
-         * @param {string} setting
-         * @param {*} value
-         */
-        updateConfigSetting: function (setting, value) {
-            if (setting in this.config && value != undefined) {
-                this.config[setting] = value;
-
-                switch (setting) {
-                    case 'GRAVITY':
-                    case 'MIN_JUMP_HEIGHT':
-                    case 'SPEED_DROP_COEFFICIENT':
-                        this.tRex.config[setting] = value;
-                        break;
-                    case 'INITIAL_JUMP_VELOCITY':
-                        this.tRex.setJumpVelocity(value);
-                        break;
-                    case 'SPEED':
-                        this.setSpeed(value);
-                        break;
-                }
-            }
-        },
-
-        /**
-         * Cache the appropriate image sprite from the page and get the sprite sheet
-         * definition.
-         */
         loadImages: function () {
+            // 显示器判断
             if (IS_HIDPI) {
                 Runner.imageSprite = document.getElementById('offline-resources-2x');
                 this.spriteDef = Runner.spriteDefinition.HDPI;
@@ -293,16 +242,17 @@
             }
 
             if (Runner.imageSprite.complete) {
+                // 初始化
                 this.init();
             } else {
-                // If the images are not yet loaded, add a listener.
+                // 如果图像尚未加载，添加侦听器
                 Runner.imageSprite.addEventListener(Runner.events.LOAD,
                     this.init.bind(this));
             }
         },
 
         /**
-         * Load and decode base 64 encoded sounds.
+         * 加载和解码64进制编码的声音。
          */
         loadSounds: function () {
             if (!IS_IOS) {
@@ -317,7 +267,7 @@
                     soundSrc = soundSrc.substr(soundSrc.indexOf(',') + 1);
                     var buffer = decodeBase64ToArrayBuffer(soundSrc);
 
-                    // Async, so no guarantee of order in array.
+                    // 异步，因此不能保证数组中的顺序
                     this.audioContext.decodeAudioData(buffer, function (index, audioData) {
                         this.soundFx[index] = audioData;
                     }.bind(this, sound));
@@ -326,13 +276,13 @@
         },
 
         /**
-         * Sets the game speed. Adjust the speed accordingly if on a smaller screen.
+         * 设置游戏速度。如果屏幕较小，则相应调整速度。
          * @param {number} opt_speed
          */
         setSpeed: function (opt_speed) {
             var speed = opt_speed || this.currentSpeed;
 
-            // Reduce the speed on smaller mobile screens.
+            // 在较小的移动屏幕上降低速度。
             if (this.dimensions.WIDTH < DEFAULT_WIDTH) {
                 var mobileSpeed = speed * this.dimensions.WIDTH / DEFAULT_WIDTH *
                     this.config.MOBILE_SPEED_COEFFICIENT;
@@ -343,10 +293,10 @@
         },
 
         /**
-         * Game initialiser.
+         * 游戏初始化
          */
         init: function () {
-            // Hide the static icon.
+            // 隐藏静态图标
             document.querySelector('.' + Runner.classes.ICON).style.visibility =
                 'hidden';
 
@@ -356,7 +306,7 @@
             this.containerEl = document.createElement('div');
             this.containerEl.className = Runner.classes.CONTAINER;
 
-            // Player canvas container.
+            // 播放器 canvas 容器
             this.canvas = createCanvas(this.containerEl, this.dimensions.WIDTH,
                 this.dimensions.HEIGHT, Runner.classes.PLAYER);
 
@@ -365,15 +315,15 @@
             this.canvasCtx.fill();
             Runner.updateCanvasScaling(this.canvas);
 
-            // Horizon contains clouds, obstacles and the ground.
+            //地平线上有云、障碍物和地面
             this.horizon = new Horizon(this.canvas, this.spriteDef, this.dimensions,
                 this.config.GAP_COEFFICIENT);
 
-            // Distance meter
+            // 测量距离
             this.distanceMeter = new DistanceMeter(this.canvas,
                 this.spriteDef.TEXT_SPRITE, this.dimensions.WIDTH);
 
-            // Draw t-rex
+            // 画小恐龙
             this.tRex = new Trex(this.canvas, this.spriteDef.TREX);
 
             this.outerContainerEl.appendChild(this.containerEl);
@@ -390,7 +340,7 @@
         },
 
         /**
-         * Create the touch controller. A div that covers whole screen.
+         * 创建触摸控制器。覆盖整个屏幕的div。
          */
         createTouchController: function () {
             this.touchController = document.createElement('div');
@@ -399,7 +349,7 @@
         },
 
         /**
-         * Debounce the resize event.
+         * 取消调整尺寸大小事件的抖动
          */
         debounceResize: function () {
             if (!this.resizeTimerId_) {
@@ -409,7 +359,7 @@
         },
 
         /**
-         * Adjust game space dimensions on resize.
+         * 调整尺寸大小时调整游戏空间尺寸
          */
         adjustDimensions: function () {
             clearInterval(this.resizeTimerId_);
@@ -421,7 +371,7 @@
 
             this.dimensions.WIDTH = this.outerContainerEl.offsetWidth - padding * 2;
 
-            // Redraw the elements back onto the canvas.
+            // 将元素重新绘制回画布
             if (this.canvas) {
                 this.canvas.width = this.dimensions.WIDTH;
                 this.canvas.height = this.dimensions.HEIGHT;
@@ -433,7 +383,8 @@
                 this.horizon.update(0, 0, true);
                 this.tRex.update(0);
 
-                // Outer container and distance meter.
+                // 外部容器
+                // 测量距离
                 if (this.playing || this.crashed || this.paused) {
                     this.containerEl.style.width = this.dimensions.WIDTH + 'px';
                     this.containerEl.style.height = this.dimensions.HEIGHT + 'px';
@@ -443,7 +394,7 @@
                     this.tRex.draw(0, 0);
                 }
 
-                // Game over panel.
+                // 游戏结束面板
                 if (this.crashed && this.gameOverPanel) {
                     this.gameOverPanel.updateDimensions(this.dimensions.WIDTH);
                     this.gameOverPanel.draw();
@@ -452,22 +403,22 @@
         },
 
         /**
-         * Play the game intro.
-         * Canvas container width expands out to the full width.
+         * 
+         * Canvas容器宽度扩展到全宽。
          */
         playIntro: function () {
             if (!this.activated && !this.crashed) {
                 this.playingIntro = true;
                 this.tRex.playingIntro = true;
 
-                // CSS animation definition.
+                // CSS动画定义
                 var keyframes = '@-webkit-keyframes intro { ' +
                     'from { width:' + Trex.config.WIDTH + 'px }' +
                     'to { width: ' + this.dimensions.WIDTH + 'px }' +
                     '}';
-                
-                // create a style sheet to put the keyframe rule in 
-                // and then place the style sheet in the html head    
+
+                // 创建用于放置关键帧规则的样式表
+                // 然后将样式表放在html的head中  
                 var sheet = document.createElement('style');
                 sheet.innerHTML = keyframes;
                 document.head.appendChild(sheet);
@@ -478,10 +429,11 @@
                 this.containerEl.style.webkitAnimation = 'intro .4s ease-out 1 both';
                 this.containerEl.style.width = this.dimensions.WIDTH + 'px';
 
-                // if (this.touchController) {
-                //     this.outerContainerEl.appendChild(this.touchController);
-                // }
+                if (this.touchController) {
+                    this.outerContainerEl.appendChild(this.touchController);
+                }
                 this.playing = true;
+                
                 this.activated = true;
             } else if (this.crashed) {
                 this.restart();
@@ -490,7 +442,7 @@
 
 
         /**
-         * Update the game status to started.
+         * 将游戏状态更新为“已开始”
          */
         startGame: function () {
             this.runningTime = 0;
@@ -499,7 +451,7 @@
             this.containerEl.style.webkitAnimation = '';
             this.playCount++;
 
-            // Handle tabbing off the page. Pause the current game.
+            // 当焦点从页面上离开。暂停当前游戏。
             document.addEventListener(Runner.events.VISIBILITY,
                 this.onVisibilityChange.bind(this));
 
@@ -516,7 +468,7 @@
         },
 
         /**
-         * Update the game frame and schedules the next one.
+         * 更新游戏框架并安排下一个
          */
         update: function () {
             this.updatePending = false;
@@ -535,12 +487,12 @@
                 this.runningTime += deltaTime;
                 var hasObstacles = this.runningTime > this.config.CLEAR_TIME;
 
-                // First jump triggers the intro.
+                // 第一个跳转触发了playIntro
                 if (this.tRex.jumpCount == 1 && !this.playingIntro) {
                     this.playIntro();
                 }
 
-                // The horizon doesn't move until the intro is over.
+                // 直到playIntro结束，地平线才会移动
                 if (this.playingIntro) {
                     this.horizon.update(0, this.currentSpeed, hasObstacles);
                 } else {
@@ -549,7 +501,7 @@
                         this.inverted);
                 }
 
-                // Check for collisions.
+                // 检测碰撞
                 var collision = hasObstacles &&
                     checkForCollision(this.horizon.obstacles[0], this.tRex);
 
@@ -570,7 +522,7 @@
                     this.playSound(this.soundFx.SCORE);
                 }
 
-                // Night mode.
+                // 夜间模式
                 if (this.invertTimer > this.config.INVERT_FADE_DURATION) {
                     this.invertTimer = 0;
                     this.invertTrigger = false;
@@ -601,7 +553,7 @@
         },
 
         /**
-         * Event handler.
+         * 事件回调
          */
         handleEvent: function (e) {
             return (function (evtType, events) {
@@ -621,27 +573,27 @@
         },
 
         /**
-         * Bind relevant key / mouse / touch listeners.
+         * 绑定相应的键/鼠标/触摸监听器
          */
         startListening: function () {
-            // Keys.
+            // 键盘
             document.addEventListener(Runner.events.KEYDOWN, this);
             document.addEventListener(Runner.events.KEYUP, this);
 
             if (IS_MOBILE) {
-                // Mobile only touch devices.
+                // 移动设备触碰
                 this.touchController.addEventListener(Runner.events.TOUCHSTART, this);
                 this.touchController.addEventListener(Runner.events.TOUCHEND, this);
                 this.containerEl.addEventListener(Runner.events.TOUCHSTART, this);
             } else {
-                // Mouse.
+                // 鼠标
                 document.addEventListener(Runner.events.MOUSEDOWN, this);
                 document.addEventListener(Runner.events.MOUSEUP, this);
             }
         },
 
         /**
-         * Remove all listeners.
+         * 移除所有的监听.
          */
         stopListening: function () {
             document.removeEventListener(Runner.events.KEYDOWN, this);
@@ -658,11 +610,11 @@
         },
 
         /**
-         * Process keydown.
+         * 方向下键的设置.
          * @param {Event} e
          */
         onKeyDown: function (e) {
-            // Prevent native page scrolling whilst tapping on mobile.
+            // 点击移动设备时防止本机页面滚动
             if (IS_MOBILE && this.playing) {
                 e.preventDefault();
             }
@@ -678,7 +630,7 @@
                             errorPageController.trackEasterEgg();
                         }
                     }
-                    //  Play sound effect and jump on starting the game for the first time.
+                    // 第一次开始游戏时播放音效并跳跃
                     if (!this.tRex.jumping && !this.tRex.ducking) {
                         this.playSound(this.soundFx.BUTTON_PRESS);
                         this.tRex.startJump(this.currentSpeed);
@@ -694,10 +646,10 @@
             if (this.playing && !this.crashed && Runner.keycodes.DUCK[e.keyCode]) {
                 e.preventDefault();
                 if (this.tRex.jumping) {
-                    // Speed drop, activated only when jump key is not pressed.
+                    // 速度下降，仅在未按下跳跃键时激活。
                     this.tRex.setSpeedDrop();
                 } else if (!this.tRex.jumping && !this.tRex.ducking) {
-                    // Duck.
+                    // 匍匐
                     this.tRex.setDuck(true);
                 }
             }
@@ -705,7 +657,7 @@
 
 
         /**
-         * Process key up.
+         * 方向上键的设置
          * @param {Event} e
          */
         onKeyUp: function (e) {
@@ -720,7 +672,7 @@
                 this.tRex.speedDrop = false;
                 this.tRex.setDuck(false);
             } else if (this.crashed) {
-                // Check that enough time has elapsed before allowing jump key to restart.
+                // 在允许跳跃键重新启动之前，请检查是否经过足够的时间
                 var deltaTime = getTimeStamp() - this.time;
 
                 if (Runner.keycodes.RESTART[keyCode] || this.isLeftClickOnCanvas(e) ||
@@ -729,15 +681,15 @@
                     this.restart();
                 }
             } else if (this.paused && isjumpKey) {
-                // Reset the jump state
+                // 重置跳跃状态
                 this.tRex.reset();
                 this.play();
             }
         },
 
         /**
-         * Returns whether the event was a left click on canvas.
-         * On Windows right click is registered as a click.
+         * 返回事件是否是在画布上单击鼠标左键。在Windows上，右键单击注册为单击。
+         * 
          * @param {Event} e
          * @return {boolean}
          */
@@ -747,7 +699,7 @@
         },
 
         /**
-         * RequestAnimationFrame wrapper.
+         * RequestAnimationFrame 包装器
          */
         scheduleNextUpdate: function () {
             if (!this.updatePending) {
@@ -757,7 +709,7 @@
         },
 
         /**
-         * Whether the game is running.
+         * 游戏是否正在运行
          * @return {boolean}
          */
         isRunning: function () {
@@ -765,7 +717,7 @@
         },
 
         /**
-         * Game over state.
+         * 游戏结束状态
          */
         gameOver: function () {
             this.playSound(this.soundFx.HIT);
@@ -777,7 +729,7 @@
 
             this.tRex.update(100, Trex.status.CRASHED);
 
-            // Game over panel.
+            // 游戏结束面板
             if (!this.gameOverPanel) {
                 this.gameOverPanel = new GameOverPanel(this.canvas,
                     this.spriteDef.TEXT_SPRITE, this.spriteDef.RESTART,
@@ -786,13 +738,13 @@
                 this.gameOverPanel.draw();
             }
 
-            // Update the high score.
+            // 更新最高分数
             if (this.distanceRan > this.highestScore) {
                 this.highestScore = Math.ceil(this.distanceRan);
                 this.distanceMeter.setHighScore(this.highestScore);
             }
 
-            // Reset the time clock.
+            // 重置时钟
             this.time = getTimeStamp();
         },
 
@@ -943,7 +895,6 @@
         }
     }
 
-
     /**
      * Create canvas element.
      * @param {HTMLElement} container Element to append canvas to.
@@ -990,7 +941,8 @@
     }
 
 
-    //******************************************************************************
+    /******************************************************************************
+    *******************************************************************************/
 
 
     /**
@@ -1088,8 +1040,11 @@
         }
     };
 
+    /******************************************************************************
+        ******************************************************************************
+        ******************************************************************************
+        *******************************************************************************/
 
-    //******************************************************************************
 
     /**
      * Check for a collision.
@@ -1151,7 +1106,6 @@
         return false;
     };
 
-
     /**
      * Adjust the collision box.
      * @param {!CollisionBox} box The original box.
@@ -1166,7 +1120,6 @@
             box.height);
     };
 
-
     /**
      * Draw the collision boxes for debug.
      */
@@ -1180,7 +1133,6 @@
             obstacleBox.width, obstacleBox.height);
         canvasCtx.restore();
     };
-
 
     /**
      * Compare two collision boxes for a collision.
@@ -1207,7 +1159,6 @@
         return crashed;
     };
 
-
     //******************************************************************************
 
     /**
@@ -1223,7 +1174,6 @@
         this.width = w;
         this.height = h;
     };
-
 
     //******************************************************************************
 
@@ -1476,7 +1426,6 @@
             speedOffset: .8
         }
     ];
-
 
     //******************************************************************************
     /**
@@ -1840,9 +1789,7 @@
             this.jumpCount = 0;
         }
     };
-
     //******************************************************************************
-
     /**
      * Handles displaying the distance meter.
      * @param {!HTMLCanvasElement} canvas
@@ -1875,7 +1822,6 @@
         this.init(canvasWidth);
     };
 
-
     /**
      * @enum {number}
      */
@@ -1884,7 +1830,6 @@
         HEIGHT: 13,
         DEST_WIDTH: 11
     };
-
 
     /**
      * Y positioning of the digits in the sprite sheet.
@@ -2125,7 +2070,6 @@
         this.init();
     };
 
-
     /**
      * Cloud object config.
      * @enum {number}
@@ -2138,7 +2082,6 @@
         MIN_SKY_LEVEL: 71,
         WIDTH: 46
     };
-
 
     Cloud.prototype = {
         /**
@@ -2482,12 +2425,11 @@
         }
     };
 
-
     //******************************************************************************
 
     /**
      * Horizon background class.
-     * @param {HTMLCanvasElement} canvas
+     * @param {HTMLCanvasElement} canvas0p-p
      * @param {Object} spritePos Sprite positioning.
      * @param {Object} dimensions Canvas dimensions.
      * @param {number} gapCoefficient
@@ -2527,7 +2469,6 @@
         HORIZON_HEIGHT: 16,
         MAX_CLOUDS: 6
     };
-
 
     Horizon.prototype = {
         /**
