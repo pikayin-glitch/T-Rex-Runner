@@ -2527,19 +2527,19 @@
         },
 
         /**
-         * Update the obstacle positions.
+         * 更新障碍物位置。
          * @param {number} deltaTime
          * @param {number} currentSpeed
          */
         updateObstacles: function (deltaTime, currentSpeed) {
-            // Obstacles, move to Horizon layer.
+            // 障碍物，移动到地平线层。
             var updatedObstacles = this.obstacles.slice(0);
 
             for (var i = 0; i < this.obstacles.length; i++) {
                 var obstacle = this.obstacles[i];
                 obstacle.update(deltaTime, currentSpeed);
 
-                // Clean up existing obstacles.
+                // 清除已存在的障碍
                 if (obstacle.remove) {
                     updatedObstacles.shift();
                 }
@@ -2557,7 +2557,7 @@
                     lastObstacle.followingObstacleCreated = true;
                 }
             } else {
-                // Create new obstacles.
+                // 创建新的障碍
                 this.addNewObstacle(currentSpeed);
             }
         },
@@ -2567,15 +2567,15 @@
         },
 
         /**
-         * Add a new obstacle.
+         * 添加新障碍
          * @param {number} currentSpeed
          */
         addNewObstacle: function (currentSpeed) {
             var obstacleTypeIndex = getRandomNum(0, Obstacle.types.length - 1);
             var obstacleType = Obstacle.types[obstacleTypeIndex];
 
-            // Check for multiples of the same type of obstacle.
-            // Also check obstacle is available at current speed.
+            // 检查同一类型障碍物的倍数。
+            // 同时检查障碍物在当前速度下是否可用。
             if (this.duplicateObstacleCheck(obstacleType.type) ||
                 currentSpeed < obstacleType.minSpeed) {
                 this.addNewObstacle(currentSpeed);
@@ -2595,8 +2595,8 @@
         },
 
         /**
-         * Returns whether the previous two obstacles are the same as the next one.
-         * Maximum duplication is set in config value MAX_OBSTACLE_DUPLICATION.
+         * 返回前两个障碍是否与下一个相同。
+         * 最大重复在配置值MAX_OBSTACLE_DUPLICATION中设置。
          * @return {boolean}
          */
         duplicateObstacleCheck: function (nextObstacleType) {
@@ -2610,8 +2610,8 @@
         },
 
         /**
-         * Reset the horizon layer.
-         * Remove existing obstacles and reposition the horizon line.
+         * 重置地平线层。
+         * 移除现有障碍物并重新定位地平线
          */
         reset: function () {
             this.obstacles = [];
@@ -2620,9 +2620,9 @@
         },
 
         /**
-         * Update the canvas width and scaling.
-         * @param {number} width Canvas width.
-         * @param {number} height Canvas height.
+         * 更新canvas宽度和比例
+         * @param {number} width Canvas宽度
+         * @param {number} height Canvas高度
          */
         resize: function (width, height) {
             this.canvas.width = width;
@@ -2630,7 +2630,7 @@
         },
 
         /**
-         * Add a new cloud to the horizon.
+         * 添加新云
          */
         addCloud: function () {
             this.clouds.push(new Cloud(this.canvas, this.spritePos.CLOUD,
