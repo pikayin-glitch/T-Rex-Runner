@@ -786,7 +786,7 @@
         },
 
         /**
-         * Pause the game if the tab is not in focus.
+         * 页面失去焦点时暂停游戏
          */
         onVisibilityChange: function (e) {
             if (document.hidden || document.webkitHidden || e.type == 'blur' ||
@@ -799,7 +799,7 @@
         },
 
         /**
-         * Play a sound.
+         * 音效.
          * @param {SoundBuffer} soundBuffer
          */
         playSound: function (soundBuffer) {
@@ -812,8 +812,8 @@
         },
 
         /**
-         * Inverts the current page / canvas colors.
-         * @param {boolean} Whether to reset colors.
+         * 重置当前页面/画布颜色
+         * @param {boolean} Whether 重置颜色
          */
         invert: function (reset) {
             if (reset) {
@@ -829,27 +829,25 @@
 
 
     /**
-     * Updates the canvas size taking into
-     * account the backing store pixel ratio and
-     * the device pixel ratio.
+     * 更新画布大小，同时考虑存储像素比率和设备像素比率。
      *
-     * See article by Paul Lewis:
+     * 参考文章：
      * http://www.html5rocks.com/en/tutorials/canvas/hidpi/
      *
      * @param {HTMLCanvasElement} canvas
      * @param {number} opt_width
      * @param {number} opt_height
-     * @return {boolean} Whether the canvas was scaled.
+     * @return {boolean} 画布是否缩放
      */
     Runner.updateCanvasScaling = function (canvas, opt_width, opt_height) {
         var context = canvas.getContext('2d');
 
-        // Query the various pixel ratios
+        // 查询各种像素比率
         var devicePixelRatio = Math.floor(window.devicePixelRatio) || 1;
         var backingStoreRatio = Math.floor(context.webkitBackingStorePixelRatio) || 1;
         var ratio = devicePixelRatio / backingStoreRatio;
 
-        // Upscale the canvas if the two ratios don't match
+        // 如果两个比率不匹配，则放大画布
         if (devicePixelRatio !== backingStoreRatio) {
             var oldWidth = opt_width || canvas.width;
             var oldHeight = opt_height || canvas.height;
@@ -860,13 +858,13 @@
             canvas.style.width = oldWidth + 'px';
             canvas.style.height = oldHeight + 'px';
 
-            // Scale the context to counter the fact that we've manually scaled
-            // our canvas element.
+            // 缩放上下文以应对我们手动缩放的情况
+            // canvas 元素
             context.scale(ratio, ratio);
             return true;
         } else if (devicePixelRatio == 1) {
-            // Reset the canvas width / height. Fixes scaling bug when the page is
-            // zoomed and the devicePixelRatio changes accordingly.
+            // 重置canvas的宽高. 修复缩放错误当页面被缩放
+            // 以及 devicePixelRatio 相应变化
             canvas.style.width = canvas.width + 'px';
             canvas.style.height = canvas.height + 'px';
         }
@@ -875,7 +873,7 @@
 
 
     /**
-     * Get random number.
+     * 获取随机数
      * @param {number} min
      * @param {number} max
      * @param {number}
@@ -886,8 +884,8 @@
 
 
     /**
-     * Vibrate on mobile devices.
-     * @param {number} duration Duration of the vibration in milliseconds.
+     * 在移动设备上振动。
+     * @param {number} duration 振动持续时间（毫秒）.
      */
     function vibrate(duration) {
         if (IS_MOBILE && window.navigator.vibrate) {
@@ -896,8 +894,8 @@
     }
 
     /**
-     * Create canvas element.
-     * @param {HTMLElement} container Element to append canvas to.
+     * 创建canvas
+     * @param {HTMLElement} container 将canvas添加的元素
      * @param {number} width
      * @param {number} height
      * @param {string} opt_classname
@@ -916,7 +914,7 @@
 
 
     /**
-     * Decodes the base 64 audio to ArrayBuffer used by Web Audio.
+     * 将base 64 audio解码为Web audio使用的ArrayBuffer
      * @param {string} base64String
      */
     function decodeBase64ToArrayBuffer(base64String) {
@@ -933,7 +931,7 @@
 
 
     /**
-     * Return the current timestamp.
+     * 返回当前时间戳
      * @return {number}
      */
     function getTimeStamp() {
@@ -946,11 +944,11 @@
 
 
     /**
-     * Game over panel.
+     * 游戏结束面板
      * @param {!HTMLCanvasElement} canvas
      * @param {Object} textImgPos
      * @param {Object} restartImgPos
-     * @param {!Object} dimensions Canvas dimensions.
+     * @param {!Object} dimensions 画布尺寸
      * @constructor
      */
     function GameOverPanel(canvas, textImgPos, restartImgPos, dimensions) {
@@ -964,7 +962,7 @@
 
 
     /**
-     * Dimensions used in the panel.
+     * 画板中要用到的尺寸
      * @enum {number}
      */
     GameOverPanel.dimensions = {
@@ -979,9 +977,9 @@
 
     GameOverPanel.prototype = {
         /**
-         * Update the panel dimensions.
-         * @param {number} width New canvas width.
-         * @param {number} opt_height Optional new canvas height.
+         * 更新面板尺寸
+         * @param {number} width 新的canvas宽度
+         * @param {number} opt_height 可选的canvas高度
          */
         updateDimensions: function (width, opt_height) {
             this.canvasDimensions.WIDTH = width;
@@ -991,14 +989,14 @@
         },
 
         /**
-         * Draw the panel.
+         * 绘制面板
          */
         draw: function () {
             var dimensions = GameOverPanel.dimensions;
 
             var centerX = this.canvasDimensions.WIDTH / 2;
 
-            // Game over text.
+            // 游戏结束文本
             var textSourceX = dimensions.TEXT_X;
             var textSourceY = dimensions.TEXT_Y;
             var textSourceWidth = dimensions.TEXT_WIDTH;
@@ -1026,12 +1024,12 @@
             textSourceX += this.textImgPos.x;
             textSourceY += this.textImgPos.y;
 
-            // Game over text from sprite.
+            // sprite 游戏结束文本
             this.canvasCtx.drawImage(Runner.imageSprite,
                 textSourceX, textSourceY, textSourceWidth, textSourceHeight,
                 textTargetX, textTargetY, textTargetWidth, textTargetHeight);
 
-            // Restart button.
+            // 重新开始按钮.
             this.canvasCtx.drawImage(Runner.imageSprite,
                 this.restartImgPos.x, this.restartImgPos.y,
                 restartSourceWidth, restartSourceHeight,
@@ -1047,18 +1045,18 @@
 
 
     /**
-     * Check for a collision.
+     * 检测碰撞
      * @param {!Obstacle} obstacle
-     * @param {!Trex} tRex T-rex object.
-     * @param {HTMLCanvasContext} opt_canvasCtx Optional canvas context for drawing
-     *    collision boxes.
+     * @param {!Trex} tRex 小恐龙对象.
+     * @param {HTMLCanvasContext} opt_canvasCtx 绘图的可选canvas上下文
+     *    碰撞体积.
      * @return {Array<CollisionBox>}
      */
     function checkForCollision(obstacle, tRex, opt_canvasCtx) {
         var obstacleBoxXPos = Runner.defaultDimensions.WIDTH + obstacle.xPos;
 
-        // Adjustments are made to the bounding box as there is a 1 pixel white
-        // border around the t-rex and obstacles.
+        // 当有一个1像素的白色，对边界框进行了调整
+        // 霸王龙和障碍物周围的边界
         var tRexBox = new CollisionBox(
             tRex.xPos + 1,
             tRex.yPos + 1,
@@ -1071,28 +1069,28 @@
             obstacle.typeConfig.width * obstacle.size - 2,
             obstacle.typeConfig.height - 2);
 
-        // Debug outer box
+        // 调试外部box
         if (opt_canvasCtx) {
             drawCollisionBoxes(opt_canvasCtx, tRexBox, obstacleBox);
         }
 
-        // Simple outer bounds check.
+        // 简单的外部边界检查
         if (boxCompare(tRexBox, obstacleBox)) {
             var collisionBoxes = obstacle.collisionBoxes;
             var tRexCollisionBoxes = tRex.ducking ?
                 Trex.collisionBoxes.DUCKING : Trex.collisionBoxes.RUNNING;
 
-            // Detailed axis aligned box check.
+            // 详细的轴对齐复选框
             for (var t = 0; t < tRexCollisionBoxes.length; t++) {
                 for (var i = 0; i < collisionBoxes.length; i++) {
-                    // Adjust the box to actual positions.
+                    // 将碰撞体积调整到实际位置
                     var adjTrexBox =
                         createAdjustedCollisionBox(tRexCollisionBoxes[t], tRexBox);
                     var adjObstacleBox =
                         createAdjustedCollisionBox(collisionBoxes[i], obstacleBox);
                     var crashed = boxCompare(adjTrexBox, adjObstacleBox);
 
-                    // Draw boxes for debug.
+                    // 绘制调试后的碰撞体积
                     if (opt_canvasCtx) {
                         drawCollisionBoxes(opt_canvasCtx, adjTrexBox, adjObstacleBox);
                     }
@@ -1107,10 +1105,10 @@
     };
 
     /**
-     * Adjust the collision box.
-     * @param {!CollisionBox} box The original box.
-     * @param {!CollisionBox} adjustment Adjustment box.
-     * @return {CollisionBox} The adjusted collision box object.
+     * 调整碰撞体积
+     * @param {!CollisionBox} box 原始box
+     * @param {!CollisionBox} adjustment 调整的box
+     * @return {CollisionBox} 调整后的box对象
      */
     function createAdjustedCollisionBox(box, adjustment) {
         return new CollisionBox(
@@ -1121,7 +1119,7 @@
     };
 
     /**
-     * Draw the collision boxes for debug.
+     * 绘制碰撞框用于调试
      */
     function drawCollisionBoxes(canvasCtx, tRexBox, obstacleBox) {
         canvasCtx.save();
@@ -1135,10 +1133,10 @@
     };
 
     /**
-     * Compare two collision boxes for a collision.
+     * 碰撞时对比两个碰撞体积
      * @param {CollisionBox} tRexBox
      * @param {CollisionBox} obstacleBox
-     * @return {boolean} Whether the boxes intersected.
+     * @return {boolean} 碰撞体积是否有重合部分
      */
     function boxCompare(tRexBox, obstacleBox) {
         var crashed = false;
@@ -1148,7 +1146,7 @@
         var obstacleBoxX = obstacleBox.x;
         var obstacleBoxY = obstacleBox.y;
 
-        // Axis-Aligned Bounding Box method.
+        // 轴对齐边界框方法
         if (tRexBox.x < obstacleBoxX + obstacleBox.width &&
             tRexBox.x + tRexBox.width > obstacleBoxX &&
             tRexBox.y < obstacleBox.y + obstacleBox.height &&
@@ -1162,7 +1160,7 @@
     //******************************************************************************
 
     /**
-     * Collision box object.
+     * 碰撞框对象
      * @param {number} x X position.
      * @param {number} y Y Position.
      * @param {number} w Width.
@@ -1178,12 +1176,12 @@
     //******************************************************************************
 
     /**
-     * Obstacle.
+     * 障碍物.
      * @param {HTMLCanvasCtx} canvasCtx
      * @param {Obstacle.type} type
-     * @param {Object} spritePos Obstacle position in sprite.
+     * @param {Object} spritePos sprite中的障碍物位置
      * @param {Object} dimensions
-     * @param {number} gapCoefficient Mutipler in determining the gap.
+     * @param {number} gapCoefficient 确定间隙时的倍增器
      * @param {number} speed
      * @param {number} opt_xOffset
      */
@@ -1204,7 +1202,7 @@
         this.gap = 0;
         this.speedOffset = 0;
 
-        // For animated obstacles.
+        // 动画障碍物
         this.currentFrame = 0;
         this.timer = 0;
 
@@ -1212,13 +1210,13 @@
     };
 
     /**
-     * Coefficient for calculating the maximum gap.
+     * 计算最大间隙的系数
      * @const
      */
     Obstacle.MAX_GAP_COEFFICIENT = 1.5;
 
     /**
-     * Maximum obstacle grouping count.
+     * 最大障碍物分组数.
      * @const
      */
     Obstacle.MAX_OBSTACLE_LENGTH = 3,
@@ -1226,20 +1224,20 @@
 
         Obstacle.prototype = {
             /**
-             * Initialise the DOM for the obstacle.
+             * 初始化障碍物的DOM.
              * @param {number} speed
              */
             init: function (speed) {
                 this.cloneCollisionBoxes();
 
-                // Only allow sizing if we're at the right speed.
+                // 只有在速度合适的情况下才允许调整尺寸.
                 if (this.size > 1 && this.typeConfig.multipleSpeed > speed) {
                     this.size = 1;
                 }
 
                 this.width = this.typeConfig.width * this.size;
 
-                // Check if obstacle can be positioned at various heights.
+                // 检查障碍物是否可以放置在不同高度
                 if (Array.isArray(this.typeConfig.yPos)) {
                     var yPosConfig = IS_MOBILE ? this.typeConfig.yPosMobile :
                         this.typeConfig.yPos;
@@ -1250,8 +1248,8 @@
 
                 this.draw();
 
-                // Make collision box adjustments,
-                // Central box is adjusted to the size as one box.
+                // 进行碰撞盒调整
+                // 中央盒子调整为一个盒子大小.
                 //      ____        ______        ________
                 //    _|   |-|    _|     |-|    _|       |-|
                 //   | |<->| |   | |<--->| |   | |<----->| |
@@ -1264,7 +1262,7 @@
                     this.collisionBoxes[2].x = this.width - this.collisionBoxes[2].width;
                 }
 
-                // For obstacles that go at a different speed from the horizon.
+                // 对于与地平线速度不同的障碍物
                 if (this.typeConfig.speedOffset) {
                     this.speedOffset = Math.random() > 0.5 ? this.typeConfig.speedOffset :
                         -this.typeConfig.speedOffset;
@@ -1274,7 +1272,7 @@
             },
 
             /**
-             * Draw and crop based on size.
+             * 根据大小来绘制和裁剪
              */
             draw: function () {
                 var sourceWidth = this.typeConfig.width;
@@ -1285,11 +1283,11 @@
                     sourceHeight = sourceHeight * 2;
                 }
 
-                // X position in sprite.
+                // sprite中的X位置
                 var sourceX = (sourceWidth * this.size) * (0.5 * (this.size - 1)) +
                     this.spritePos.x;
 
-                // Animation frames.
+                // 动画帧
                 if (this.currentFrame > 0) {
                     sourceX += sourceWidth * this.currentFrame;
                 }
@@ -1302,7 +1300,7 @@
             },
 
             /**
-             * Obstacle frame update.
+             * 更新障碍物帧.
              * @param {number} deltaTime
              * @param {number} speed
              */
@@ -1313,7 +1311,7 @@
                     }
                     this.xPos -= Math.floor((speed * FPS / 1000) * deltaTime);
 
-                    // Update frame
+                    // 更新帧
                     if (this.typeConfig.numFrames) {
                         this.timer += deltaTime;
                         if (this.timer >= this.typeConfig.frameRate) {
@@ -1332,8 +1330,8 @@
             },
 
             /**
-             * Calculate a random gap size.
-             * - Minimum gap gets wider as speed increses
+             * 计算随机间隙大小
+             * - 随着速度的增加，最小间隙变宽
              * @param {number} gapCoefficient
              * @param {number} speed
              * @return {number} The gap size.
