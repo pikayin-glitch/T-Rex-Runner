@@ -1334,7 +1334,7 @@
              * - 随着速度的增加，最小间隙变宽
              * @param {number} gapCoefficient
              * @param {number} speed
-             * @return {number} The gap size.
+             * @return {number} 间隙大小
              */
             getGap: function (gapCoefficient, speed) {
                 var minGap = Math.round(this.width * speed +
@@ -1342,18 +1342,16 @@
                 var maxGap = Math.round(minGap * Obstacle.MAX_GAP_COEFFICIENT);
                 return getRandomNum(minGap, maxGap);
             },
-
             /**
-             * Check if obstacle is visible.
-             * @return {boolean} Whether the obstacle is in the game area.
+             * 检查障碍物是否可见
+             * @return {boolean} 确认障碍物是否在游戏区域内。
              */
             isVisible: function () {
                 return this.xPos + this.width > 0;
             },
 
             /**
-             * Make a copy of the collision boxes, since these will change based on
-             * obstacle type and size.
+             * 复制碰撞盒，因为它们将根据障碍物类型和大小改变。
              */
             cloneCollisionBoxes: function () {
                 var collisionBoxes = this.typeConfig.collisionBoxes;
@@ -1368,11 +1366,11 @@
 
 
     /**
-     * Obstacle definitions.
-     * minGap: minimum pixel space betweeen obstacles.
-     * multipleSpeed: Speed at which multiples are allowed.
-     * speedOffset: speed faster / slower than the horizon.
-     * minSpeed: Minimum speed which the obstacle can make an appearance.
+     * 障碍物定义.
+     * minGap: 障碍物之间的最小像素空间
+     * multipleSpeed: 允许多路的速度
+     * speedOffset: 速度比地平线快/慢
+     * minSpeed: 障碍物可能出现的最小速度
      */
     Obstacle.types = [
         {
@@ -1407,8 +1405,8 @@
             type: 'PTERODACTYL',
             width: 46,
             height: 40,
-            yPos: [100, 75, 50], // Variable height.
-            yPosMobile: [100, 50], // Variable height mobile.
+            yPos: [100, 75, 50], // 可变高度
+            yPosMobile: [100, 50], // 移动设备的可变高度
             multipleSpeed: 999,
             minSpeed: 8.5,
             minGap: 150,
@@ -1424,7 +1422,6 @@
             speedOffset: .8
         }
     ];
-
     //******************************************************************************
     /**
      * T-rex game character.
@@ -1438,7 +1435,7 @@
         this.spritePos = spritePos;
         this.xPos = 0;
         this.yPos = 0;
-        // Position when on the ground.
+        // 在地面上定位
         this.groundYPos = 0;
         this.currentFrame = 0;
         this.currentAnimFrames = [];
@@ -1448,7 +1445,7 @@
         this.timer = 0;
         this.msPerFrame = 1000 / FPS;
         this.config = Trex.config;
-        // Current status.
+        // 当前状态
         this.status = Trex.status.WAITING;
 
         this.jumping = false;
@@ -1464,7 +1461,7 @@
 
 
     /**
-     * T-rex player config.
+     * 霸王龙配置
      * @enum {number}
      */
     Trex.config = {
@@ -1485,7 +1482,7 @@
 
 
     /**
-     * Used in collision detection.
+     * 用于碰撞检测
      * @type {Array<CollisionBox>}
      */
     Trex.collisionBoxes = {
@@ -1504,7 +1501,7 @@
 
 
     /**
-     * Animation states.
+     * 动画状态
      * @enum {string}
      */
     Trex.status = {
@@ -1516,14 +1513,14 @@
     };
 
     /**
-     * Blinking coefficient.
+     * 闪烁系数
      * @const
      */
     Trex.BLINK_TIMING = 7000;
 
 
     /**
-     * Animation config for different states.
+     * 不同状态的动画配置
      * @enum {Object}
      */
     Trex.animFrames = {
@@ -1552,8 +1549,8 @@
 
     Trex.prototype = {
         /**
-         * T-rex player initaliser.
-         * Sets the t-rex to blink at random intervals.
+         * 霸王龙启动
+         * 霸王龙以随机间隔闪烁
          */
         init: function () {
             this.groundYPos = Runner.defaultDimensions.HEIGHT - this.config.HEIGHT -
@@ -1566,8 +1563,8 @@
         },
 
         /**
-         * Setter for the jump velocity.
-         * The approriate drop velocity is also set.
+         * 设定跳跃速度
+         * 并设定合适的下落速度
          */
         setJumpVelocity: function (setting) {
             this.config.INIITAL_JUMP_VELOCITY = -setting;
@@ -1575,14 +1572,14 @@
         },
 
         /**
-         * Set the animation status.
+         * 设置动画状态
          * @param {!number} deltaTime
-         * @param {Trex.status} status Optional status to switch to.
+         * @param {Trex.status} status 切换的可选状态
          */
         update: function (deltaTime, opt_status) {
             this.timer += deltaTime;
 
-            // Update the status.
+            // 更新状态
             if (opt_status) {
                 this.status = opt_status;
                 this.currentFrame = 0;
@@ -1595,7 +1592,7 @@
                 }
             }
 
-            // Game intro animation, T-rex moves in from the left.
+            // 霸王龙从左侧移动
             if (this.playingIntro && this.xPos < this.config.START_X_POS) {
                 this.xPos += Math.round((this.config.START_X_POS /
                     this.config.INTRO_DURATION) * deltaTime);
@@ -1607,14 +1604,14 @@
                 this.draw(this.currentAnimFrames[this.currentFrame], 0);
             }
 
-            // Update the frame position.
+            // 更新帧位置
             if (this.timer >= this.msPerFrame) {
                 this.currentFrame = this.currentFrame ==
                     this.currentAnimFrames.length - 1 ? 0 : this.currentFrame + 1;
                 this.timer = 0;
             }
 
-            // Speed drop becomes duck if the down key is still being pressed.
+            // 如果依然按方向下键，则变为匍匐状态。
             if (this.speedDrop && this.yPos == this.groundYPos) {
                 this.speedDrop = false;
                 this.setDuck(true);
@@ -1622,7 +1619,7 @@
         },
 
         /**
-         * Draw the t-rex to a particular position.
+         * 将霸王龙绘制到指定位置。
          * @param {number} x
          * @param {number} y
          */
@@ -1640,22 +1637,22 @@
                 sourceHeight *= 2;
             }
 
-            // Adjustments for sprite sheet position.
+            // 调整spritesheet的位置
             sourceX += this.spritePos.x;
             sourceY += this.spritePos.y;
 
-            // Ducking.
+            // 匍匐.
             if (this.ducking && this.status != Trex.status.CRASHED) {
                 this.canvasCtx.drawImage(Runner.imageSprite, sourceX, sourceY,
                     sourceWidth, sourceHeight,
                     this.xPos, this.yPos,
                     this.config.WIDTH_DUCK, this.config.HEIGHT);
             } else {
-                // Crashed whilst ducking. Trex is standing up so needs adjustment.
+                // 在匍匐时发生碰撞。小恐龙站起来了，所以需要调整
                 if (this.ducking && this.status == Trex.status.CRASHED) {
                     this.xPos++;
                 }
-                // Standing / running
+                // 站立 / 奔跑
                 this.canvasCtx.drawImage(Runner.imageSprite, sourceX, sourceY,
                     sourceWidth, sourceHeight,
                     this.xPos, this.yPos,
@@ -1664,15 +1661,15 @@
         },
 
         /**
-         * Sets a random time for the blink to happen.
+         * 设置闪烁发生的随机时间.
          */
         setBlinkDelay: function () {
             this.blinkDelay = Math.ceil(Math.random() * Trex.BLINK_TIMING);
         },
 
         /**
-         * Make t-rex blink at random intervals.
-         * @param {number} time Current time in milliseconds.
+         * 让霸王龙以随机间隔闪烁
+         * @param {number} time 当前时间（毫秒）
          */
         blink: function (time) {
             var deltaTime = time - this.animStartTime;
@@ -1681,7 +1678,7 @@
                 this.draw(this.currentAnimFrames[this.currentFrame], 0);
 
                 if (this.currentFrame == 1) {
-                    // Set new random delay to blink.
+                    // 将新的随机延迟设置为闪烁。
                     this.setBlinkDelay();
                     this.animStartTime = time;
                     this.blinkCount++;
@@ -1690,13 +1687,13 @@
         },
 
         /**
-         * Initialise a jump.
+         * 跳跃初始化
          * @param {number} speed
          */
         startJump: function (speed) {
             if (!this.jumping) {
                 this.update(0, Trex.status.JUMPING);
-                // Tweak the jump velocity based on the speed.
+                // 根据速度调整跳跃的速度
                 this.jumpVelocity = this.config.INIITAL_JUMP_VELOCITY - (speed / 10);
                 this.jumping = true;
                 this.reachedMinHeight = false;
@@ -1705,7 +1702,7 @@
         },
 
         /**
-         * Jump is complete, falling down.
+         * 跳跃完成，开始下落
          */
         endJump: function () {
             if (this.reachedMinHeight &&
@@ -1715,7 +1712,7 @@
         },
 
         /**
-         * Update frame for a jump.
+         * 更新跳跃帧
          * @param {number} deltaTime
          * @param {number} speed
          */
@@ -1723,7 +1720,7 @@
             var msPerFrame = Trex.animFrames[this.status].msPerFrame;
             var framesElapsed = deltaTime / msPerFrame;
 
-            // Speed drop makes Trex fall faster.
+            // 方向下键让小恐龙快速下落
             if (this.speedDrop) {
                 this.yPos += Math.round(this.jumpVelocity *
                     this.config.SPEED_DROP_COEFFICIENT * framesElapsed);
@@ -1733,17 +1730,17 @@
 
             this.jumpVelocity += this.config.GRAVITY * framesElapsed;
 
-            // Minimum height has been reached.
+            // 已达到最小高度
             if (this.yPos < this.minJumpHeight || this.speedDrop) {
                 this.reachedMinHeight = true;
             }
 
-            // Reached max height
+            // 已达到最大高度
             if (this.yPos < this.config.MAX_JUMP_HEIGHT || this.speedDrop) {
                 this.endJump();
             }
 
-            // Back down at ground level. Jump completed.
+            // 回到地面高度，跳跃完成
             if (this.yPos > this.groundYPos) {
                 this.reset();
                 this.jumpCount++;
@@ -1753,7 +1750,7 @@
         },
 
         /**
-         * Set the speed drop. Immediately cancels the current jump.
+         * 方向下键立即取消当前跳跃
          */
         setSpeedDrop: function () {
             this.speedDrop = true;
@@ -1774,7 +1771,7 @@
         },
 
         /**
-         * Reset the t-rex to running at start of game.
+         * 游戏开始时，将霸王龙重置为跑步状态
          */
         reset: function () {
             this.yPos = this.groundYPos;
@@ -1789,9 +1786,9 @@
     };
     //******************************************************************************
     /**
-     * Handles displaying the distance meter.
+     * 距离测量的回调
      * @param {!HTMLCanvasElement} canvas
-     * @param {Object} spritePos Image position in sprite.
+     * @param {Object} spritePos sprite的图片定位
      * @param {number} canvasWidth
      * @constructor
      */
@@ -1830,39 +1827,39 @@
     };
 
     /**
-     * Y positioning of the digits in the sprite sheet.
-     * X position is always 0.
+     * 数字在sprite中的Y定位
+     * X定位始终为0
      * @type {Array<number>}
      */
     DistanceMeter.yPos = [0, 13, 27, 40, 53, 67, 80, 93, 107, 120];
 
 
     /**
-     * Distance meter config.
+     * 距离测量配置
      * @enum {number}
      */
     DistanceMeter.config = {
-        // Number of digits.
+        // 位数
         MAX_DISTANCE_UNITS: 5,
 
-        // Distance that causes achievement animation.
+        // 成功产生动画的距离。
         ACHIEVEMENT_DISTANCE: 100,
 
-        // Used for conversion from pixel distance to a scaled unit.
+        // 用于将像素距离转换为缩放单位。
         COEFFICIENT: 0.025,
 
-        // Flash duration in milliseconds.
+        // flash持续时间（毫秒）。
         FLASH_DURATION: 1000 / 4,
 
-        // Flash iterations for achievement animation.
+        // 动画的flash迭代
         FLASH_ITERATIONS: 3
     };
 
 
     DistanceMeter.prototype = {
         /**
-         * Initialise the distance meter to '00000'.
-         * @param {number} width Canvas width in px.
+         * 距离初始化为 "00000"
+         * @param {number} width Canvas宽度（px）
          */
         init: function (width) {
             var maxDistanceStr = '';
@@ -1879,7 +1876,7 @@
         },
 
         /**
-         * Calculate the xPos in the canvas.
+         * 计算画布中的X定位
          * @param {number} canvasWidth
          */
         calcXPos: function (canvasWidth) {
@@ -1888,10 +1885,10 @@
         },
 
         /**
-         * Draw a digit to canvas.
-         * @param {number} digitPos Position of the digit.
-         * @param {number} value Digit value 0-9.
-         * @param {boolean} opt_highScore Whether drawing the high score.
+         * 在canvas上绘制数字
+         * @param {number} digitPos 数字的位置
+         * @param {number} value  数字"0-9"
+         * @param {boolean} opt_highScore 是否修改最高分
          */
         draw: function (digitPos, value, opt_highScore) {
             var sourceWidth = DistanceMeter.dimensions.WIDTH;
@@ -1904,7 +1901,7 @@
             var targetWidth = DistanceMeter.dimensions.WIDTH;
             var targetHeight = DistanceMeter.dimensions.HEIGHT;
 
-            // For high DPI we 2x source values.
+            //  对于较高的DPI，我们将值增加为2倍
             if (IS_HIDPI) {
                 sourceWidth *= 2;
                 sourceHeight *= 2;
@@ -1917,7 +1914,7 @@
             this.canvasCtx.save();
 
             if (opt_highScore) {
-                // Left of the current score.
+                // 在当前分数的左侧
                 var highScoreX = this.x - (this.maxScoreUnits * 2) *
                     DistanceMeter.dimensions.WIDTH;
                 this.canvasCtx.translate(highScoreX, this.y);
@@ -1935,19 +1932,19 @@
         },
 
         /**
-         * Covert pixel distance to a 'real' distance.
-         * @param {number} distance Pixel distance ran.
-         * @return {number} The 'real' distance ran.
+         * 将像素距离转换为“真实”距离。
+         * @param {number} distance 跑过的像素距离.
+         * @return {number} 跑过的真实距离
          */
         getActualDistance: function (distance) {
             return distance ? Math.round(distance * this.config.COEFFICIENT) : 0;
         },
 
         /**
-         * Update the distance meter.
+         * 更新距离测量
          * @param {number} distance
          * @param {number} deltaTime
-         * @return {boolean} Whether the acheivement sound fx should be played.
+         * @return {boolean} 是否应播放成功音效
          */
         update: function (deltaTime, distance) {
             var paint = true;
@@ -1955,7 +1952,7 @@
 
             if (!this.acheivement) {
                 distance = this.getActualDistance(distance);
-                // Score has gone beyond the initial digit count.
+                // 分数已超过初始数字计数.
                 if (distance > this.maxScore && this.maxScoreUnits ==
                     this.config.MAX_DISTANCE_UNITS) {
                     this.maxScoreUnits++;
@@ -1965,15 +1962,15 @@
                 }
 
                 if (distance > 0) {
-                    // Acheivement unlocked
+                    // 成功解锁
                     if (distance % this.config.ACHIEVEMENT_DISTANCE == 0) {
-                        // Flash score and play sound.
+                        // 闪烁分数并播放声音
                         this.acheivement = true;
                         this.flashTimer = 0;
                         playSound = true;
                     }
 
-                    // Create a string representation of the distance with leading 0.
+                    // 创建以0开头的距离的字符串表示形式。
                     var distanceStr = (this.defaultString +
                         distance).substr(-this.maxScoreUnits);
                     this.digits = distanceStr.split('');
@@ -1981,7 +1978,7 @@
                     this.digits = this.defaultString.split('');
                 }
             } else {
-                // Control flashing of the score on reaching acheivement.
+                // 达到目标时控制分数闪烁。
                 if (this.flashIterations <= this.config.FLASH_ITERATIONS) {
                     this.flashTimer += deltaTime;
 
@@ -1999,7 +1996,7 @@
                 }
             }
 
-            // Draw the digits if not flashing.
+            // 如果不闪烁，则绘制数字。
             if (paint) {
                 for (var i = this.digits.length - 1; i >= 0; i--) {
                     this.draw(i, parseInt(this.digits[i]));
@@ -2011,7 +2008,7 @@
         },
 
         /**
-         * Draw the high score.
+         * 绘制最高分
          */
         drawHighScore: function () {
             this.canvasCtx.save();
@@ -2023,8 +2020,8 @@
         },
 
         /**
-         * Set the highscore as a array string.
-         * Position of char in the sprite: H - 10, I - 11.
+         * 将最高分设置为数组字符串
+         * 字符在sprite中的位置: H - 10, I - 11.
          * @param {number} distance Distance ran in pixels.
          */
         setHighScore: function (distance) {
@@ -2036,7 +2033,7 @@
         },
 
         /**
-         * Reset the distance meter back to '00000'.
+         * 重置距离为“00000”
          */
         reset: function () {
             this.update(0);
@@ -2048,10 +2045,10 @@
     //******************************************************************************
 
     /**
-     * Cloud background item.
-     * Similar to an obstacle object but without collision boxes.
-     * @param {HTMLCanvasElement} canvas Canvas element.
-     * @param {Object} spritePos Position of image in sprite.
+     * 背景云
+     * 类似于障碍物，但没有碰撞框。
+     * @param {HTMLCanvasElement} canvas Canvas元素
+     * @param {Object} spritePos 图片在sprite中的位置
      * @param {number} containerWidth
      */
     function Cloud(canvas, spritePos, containerWidth) {
@@ -2069,7 +2066,7 @@
     };
 
     /**
-     * Cloud object config.
+     * 云对象的配置
      * @enum {number}
      */
     Cloud.config = {
@@ -2083,7 +2080,7 @@
 
     Cloud.prototype = {
         /**
-         * Initialise the cloud. Sets the Cloud height.
+         * 初始化云。设置云高度
          */
         init: function () {
             this.yPos = getRandomNum(Cloud.config.MAX_SKY_LEVEL,
@@ -2092,7 +2089,7 @@
         },
 
         /**
-         * Draw the cloud.
+         * 绘制云
          */
         draw: function () {
             this.canvasCtx.save();
@@ -2114,7 +2111,7 @@
         },
 
         /**
-         * Update the cloud position.
+         * 更新云的位置
          * @param {number} speed
          */
         update: function (speed) {
@@ -2122,7 +2119,7 @@
                 this.xPos -= Math.ceil(speed);
                 this.draw();
 
-                // Mark as removeable if no longer in the canvas.
+                // 如果已经不在canvas中，则标记为可移除
                 if (!this.isVisible()) {
                     this.remove = true;
                 }
@@ -2130,7 +2127,7 @@
         },
 
         /**
-         * Check if the cloud is visible on the stage.
+         * 检查云是否可见了.
          * @return {boolean}
          */
         isVisible: function () {
@@ -2142,7 +2139,7 @@
     //******************************************************************************
 
     /**
-     * Nightmode shows a moon and stars on the horizon.
+     * 夜间模式显示地平线上的月亮和星星
      */
     function NightMode(canvas, spritePos, containerWidth) {
         this.spritePos = spritePos;
@@ -2176,12 +2173,12 @@
 
     NightMode.prototype = {
         /**
-         * Update moving moon, changing phases.
-         * @param {boolean} activated Whether night mode is activated.
+         * 更新移动的月亮，改变相位。
+         * @param {boolean} activated 夜间模式是否激活。
          * @param {number} delta
          */
         update: function (activated, delta) {
-            // Moon phase.
+            // 月亮相位.
             if (activated && this.opacity == 0) {
                 this.currentPhase++;
 
@@ -2190,18 +2187,18 @@
                 }
             }
 
-            // Fade in / out.
+            // 淡入淡出
             if (activated && (this.opacity < 1 || this.opacity == 0)) {
                 this.opacity += NightMode.config.FADE_SPEED;
             } else if (this.opacity > 0) {
                 this.opacity -= NightMode.config.FADE_SPEED;
             }
 
-            // Set moon positioning.
+            // 设置月球定位
             if (this.opacity > 0) {
                 this.xPos = this.updateXPos(this.xPos, NightMode.config.MOON_SPEED);
 
-                // Update stars.
+                // 更新星星
                 if (this.drawStars) {
                     for (var i = 0; i < NightMode.config.NUM_STARS; i++) {
                         this.stars[i].x = this.updateXPos(this.stars[i].x,
@@ -2246,7 +2243,7 @@
             this.canvasCtx.save();
             this.canvasCtx.globalAlpha = this.opacity;
 
-            // Stars.
+            // 星星
             if (this.drawStars) {
                 for (var i = 0; i < NightMode.config.NUM_STARS; i++) {
                     this.canvasCtx.drawImage(Runner.imageSprite,
@@ -2256,7 +2253,7 @@
                 }
             }
 
-            // Moon.
+            // 月亮
             this.canvasCtx.drawImage(Runner.imageSprite, moonSourceX,
                 this.spritePos.y, moonSourceWidth, moonSourceHeight,
                 Math.round(this.xPos), this.yPos,
@@ -2266,7 +2263,7 @@
             this.canvasCtx.restore();
         },
 
-        // Do star placement.
+        // 做星星定位。
         placeStars: function () {
             var segmentSize = Math.round(this.containerWidth /
                 NightMode.config.NUM_STARS);
@@ -2298,10 +2295,10 @@
     //******************************************************************************
 
     /**
-     * Horizon Line.
-     * Consists of two connecting lines. Randomly assigns a flat / bumpy horizon.
+     * 地平线
+     * 由两条连接线组成。随机指定平坦/崎岖的地平线。
      * @param {HTMLCanvasElement} canvas
-     * @param {Object} spritePos Horizon position in sprite.
+     * @param {Object} spritePos 在sprite中地平线
      * @constructor
      */
     function HorizonLine(canvas, spritePos) {
@@ -2322,7 +2319,7 @@
 
 
     /**
-     * Horizon line dimensions.
+     * 地平线尺寸
      * @enum {number}
      */
     HorizonLine.dimensions = {
@@ -2334,7 +2331,7 @@
 
     HorizonLine.prototype = {
         /**
-         * Set the source dimensions of the horizon line.
+         * 设置地平线的源尺寸
          */
         setSourceDimensions: function () {
 
@@ -2356,14 +2353,14 @@
         },
 
         /**
-         * Return the crop x position of a type.
+         * 返回类型的x位置。
          */
         getRandomType: function () {
             return Math.random() > this.bumpThreshold ? this.dimensions.WIDTH : 0;
         },
 
         /**
-         * Draw the horizon line.
+         * 绘制地平线
          */
         draw: function () {
             this.canvasCtx.drawImage(Runner.imageSprite, this.sourceXPos[0],
@@ -2380,8 +2377,8 @@
         },
 
         /**
-         * Update the x position of an indivdual piece of the line.
-         * @param {number} pos Line position.
+         * 更新线的单个部分的x位置。
+         * @param {number} pos 线定位
          * @param {number} increment
          */
         updateXPos: function (pos, increment) {
@@ -2399,7 +2396,7 @@
         },
 
         /**
-         * Update the horizon line.
+         * 更新地平线
          * @param {number} deltaTime
          * @param {number} speed
          */
@@ -2415,7 +2412,7 @@
         },
 
         /**
-         * Reset horizon to the starting position.
+         * 将地平线重置为起始位置
          */
         reset: function () {
             this.xPos[0] = 0;
@@ -2426,10 +2423,10 @@
     //******************************************************************************
 
     /**
-     * Horizon background class.
-     * @param {HTMLCanvasElement} canvas0p-p
-     * @param {Object} spritePos Sprite positioning.
-     * @param {Object} dimensions Canvas dimensions.
+     * 地平线背景类
+     * @param {HTMLCanvasElement} canvas0p -p
+     * @param {Object} spritePos Sprite 位置
+     * @param {Object} dimensions Canvas 尺寸
      * @param {number} gapCoefficient
      * @constructor
      */
@@ -2446,18 +2443,18 @@
         this.spritePos = spritePos;
         this.nightMode = null;
 
-        // Cloud
+        // 云
         this.clouds = [];
         this.cloudSpeed = this.config.BG_CLOUD_SPEED;
 
-        // Horizon
+        // 地平线
         this.horizonLine = null;
         this.init();
     };
 
 
     /**
-     * Horizon config.
+     * 地平线配置
      * @enum {number}
      */
     Horizon.config = {
@@ -2470,7 +2467,7 @@
 
     Horizon.prototype = {
         /**
-         * Initialise the horizon. Just add the line and a cloud. No obstacles.
+         * 初始化地平线。只需添加线条和云。没有障碍。
          */
         init: function () {
             this.addCloud();
@@ -2482,10 +2479,9 @@
         /**
          * @param {number} deltaTime
          * @param {number} currentSpeed
-         * @param {boolean} updateObstacles Used as an override to prevent
-         *     the obstacles from being updated / added. This happens in the
-         *     ease in section.
-         * @param {boolean} showNightMode Night mode activated.
+         * @param {boolean} updateObstacles 用作覆盖以防止更新/添加障碍物
+         * 这发生在ease in部分。
+         * @param {boolean} showNightMode 夜间模式激活状态
          */
         update: function (deltaTime, currentSpeed, updateObstacles, showNightMode) {
             this.runningTime += deltaTime;
@@ -2499,7 +2495,7 @@
         },
 
         /**
-         * Update the cloud positions.
+         * 更新云定位
          * @param {number} deltaTime
          * @param {number} currentSpeed
          */
@@ -2514,14 +2510,14 @@
 
                 var lastCloud = this.clouds[numClouds - 1];
 
-                // Check for adding a new cloud.
+                // 检查是否添加新云
                 if (numClouds < this.config.MAX_CLOUDS &&
                     (this.dimensions.WIDTH - lastCloud.xPos) > lastCloud.cloudGap &&
                     this.cloudFrequency > Math.random()) {
                     this.addCloud();
                 }
 
-                // Remove expired clouds.
+                // 删除过期的云
                 this.clouds = this.clouds.filter(function (obj) {
                     return !obj.remove;
                 });
