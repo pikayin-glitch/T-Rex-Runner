@@ -2565,7 +2565,7 @@
         removeFirstObstacle: function () {
             this.obstacles.shift();
         },
-
+    
         /**
          * 添加新障碍
          * @param {number} currentSpeed
